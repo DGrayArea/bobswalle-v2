@@ -11,6 +11,7 @@ const bot = new TelegramBot(config.telegramBotToken);
 
 // Set webhook URL after deploying
 // const WEBHOOK_URL = `https://api.telegram.org/bot${config.telegramBotToken}/setWebhook?url=https://https://bobswallet.vercel.app/api/webhook`;
+//https://api.telegram.org/bot7479941090:AAG6S8U9cUplRpg6aAUYLM-7Mw4GVpwyXns/setWebhook?url=https://bobswallet.vercel.app/api/webhook
 
 const WEBHOOK_URL = `https://bobswallet.vercel.app/api/webhook`;
 bot.setWebHook(WEBHOOK_URL);
