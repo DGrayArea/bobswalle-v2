@@ -1,22 +1,21 @@
-import TelegramBot from 'node-telegram-bot-api';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import fetch from 'node-fetch';
-import { JsonRpcProvider, Contract } from 'ethers';
-import config from './config.js';
-import logger from './logger.js';
-
+import TelegramBot from "node-telegram-bot-api";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import fetch from "node-fetch";
+import { JsonRpcProvider, Contract } from "ethers";
+import config from "./config.js";
+import logger from "./logger.js";
 
 // Initialize bot and Solana connection
-const bot = new TelegramBot(config.telegramBotToken, { 
+const bot = new TelegramBot(config.telegramBotToken, {
   polling: true,
-  request_timeout: 30000 
+  request_timeout: 30000,
 });
 
 // Dynamically set RPC providers based on environment
 const solanaConnection = new Connection(
-  process.env.SOLANA_RPC_URL || config.solanaRpcUrl, 
-  { commitment: 'confirmed' }
+  process.env.SOLANA_RPC_URL || config.solanaRpcUrl,
+  { commitment: "confirmed" }
 );
 const ethereumProvider = new JsonRpcProvider(
   process.env.ETHEREUM_RPC_URL || config.ethereumRpcUrl
@@ -41,7 +40,7 @@ const blockchainMenu = {
 const blockchainWallets = {
   ethereum: process.env.ETHEREUM_WALLET_ADDRESS,
   base: process.env.BASE_WALLET_ADDRESS,
-  solana: process.env.SOLANA_WALLET_ADDRESS
+  solana: process.env.SOLANA_WALLET_ADDRESS,
 };
 
 // Separate price plans for different blockchains
@@ -63,7 +62,7 @@ const blockchainPlans = {
     "12_hour": { amount: 5.0, description: "12 Hour Volume Boost" },
     "6_hour": { amount: 2.5, description: "6 Hour Volume Boost" },
     "3_hour": { amount: 1.0, description: "3 Hour Volume Boost" },
-  }
+  },
 };
 
 // Payment method selection menu
@@ -97,9 +96,16 @@ function isValidSolanaAddress(address) {
 function generatePlanMenu(blockchain) {
   return {
     reply_markup: {
-      inline_keyboard: Object.entries(blockchainPlans[blockchain] || {}).map(([key, plan]) => [
-        { text: `⏰ ${plan.description} (${plan.amount} ${blockchain.toUpperCase()})`, callback_data: key },
-      ]),
+      inline_keyboard: Object.entries(blockchainPlans[blockchain] || {}).map(
+        ([key, plan]) => [
+          {
+            text: `⏰ ${plan.description} (${
+              plan.amount
+            } ${blockchain.toUpperCase()})`,
+            callback_data: key,
+          },
+        ]
+      ),
     },
     parse_mode: "Markdown",
   };
@@ -137,8 +143,10 @@ async function fetchTokenDetails(blockchain, contractAddress) {
       const mintPublicKey = new PublicKey(contractAddress);
 
       // Fetch token account info more robustly
-      const tokenAccountInfo = await solanaConnection.getAccountInfo(mintPublicKey);
-      
+      const tokenAccountInfo = await solanaConnection.getAccountInfo(
+        mintPublicKey
+      );
+
       if (!tokenAccountInfo) {
         throw new Error("Token account not found or invalid");
       }
@@ -147,18 +155,18 @@ async function fetchTokenDetails(blockchain, contractAddress) {
       return {
         name: "Solana Token",
         symbol: "SOL",
-        decimals: 9  // Default Solana token decimals
+        decimals: 9, // Default Solana token decimals
       };
     } else {
       throw new Error("Unsupported blockchain");
     }
   } catch (error) {
     logger.error(`Error fetching token details: ${error.message}`);
-    return { 
+    return {
       error: error.message,
       name: "Unknown Token",
       symbol: "UNKNOWN",
-      decimals: 0
+      decimals: 0,
     };
   }
 }
@@ -167,7 +175,7 @@ async function fetchTokenDetails(blockchain, contractAddress) {
 async function handleContractAddress(chatId, blockchain, contractAddress) {
   try {
     const tokenDetails = await fetchTokenDetails(blockchain, contractAddress);
-    
+
     if (tokenDetails.error) {
       throw new Error(tokenDetails.error);
     }
@@ -193,15 +201,19 @@ async function handleContractAddress(chatId, blockchain, contractAddress) {
       `2. After payment, provide the transaction hash/link here for verification.\n\n` +
       `_⚠️ Ensure you send the exact amount to avoid delays in processing._`;
 
-    await bot.sendMessage(chatId, confirmationMessage, { parse_mode: "Markdown" });
+    await bot.sendMessage(chatId, confirmationMessage, {
+      parse_mode: "Markdown",
+    });
   } catch (error) {
     logger.error(`Error handling contract address: ${error.message}`);
-    await bot.sendMessage(chatId, `❌ Error: ${error.message}`, { parse_mode: "Markdown" });
+    await bot.sendMessage(chatId, `❌ Error: ${error.message}`, {
+      parse_mode: "Markdown",
+    });
   }
 }
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
-  const helpMessage = 
+  const helpMessage =
     "🆘 *Volume Boost Bot - Help & Support*\n\n" +
     "*How to Use the Bot:*\n" +
     "1. Start with /start command\n" +
@@ -221,9 +233,9 @@ bot.onText(/\/help/, (msg) => {
     "[📞 @multibumpersupport](https://t.me/multibumpersupport)\n\n" +
     "_Note: Our support team is available 24/7 to help you with any questions or issues._";
 
-  bot.sendMessage(chatId, helpMessage, { 
+  bot.sendMessage(chatId, helpMessage, {
     parse_mode: "Markdown",
-    disable_web_page_preview: true 
+    disable_web_page_preview: true,
   });
 });
 // Start command handler
@@ -238,26 +250,26 @@ bot.onText(/\/start/, (msg) => {
 });
 // Volume bot information command
 bot.onText(/\/volume_info/, (msg) => {
-    const chatId = msg.chat.id;
-    const volumeInfoMessage = 
-      "🤖 *Volume Bot Details*\n\n" +
-      "📈 Our Volume Bot uses advanced algorithms to simulate realistic token buys, ensuring that the volume appears legitimate and organic.\n\n" +
-      "💵 *What You Get:*\n" +
-      "• 10% of your initial payment refunded back.\n" +
-      "• All profits generated from the volume boost.\n\n" +
-      "✨ *Why Choose Us?*\n" +
-      "1. Smart buy algorithms tailored to avoid detection.\n" +
-      "2. Support for multiple blockchains (Ethereum, Solana, Base).\n" +
-      "3. Transparent process with real-time updates.\n\n" +
-      "🚀 Ready to boost your token's volume? Start with /start and follow the steps!\n\n" +
-      "_For further questions, contact our support team._";
-  
-    bot.sendMessage(chatId, volumeInfoMessage, { 
-      parse_mode: "Markdown",
-      disable_web_page_preview: true
-    });
+  const chatId = msg.chat.id;
+  const volumeInfoMessage =
+    "🤖 *Volume Bot Details*\n\n" +
+    "📈 Our Volume Bot uses advanced algorithms to simulate realistic token buys, ensuring that the volume appears legitimate and organic.\n\n" +
+    "💵 *What You Get:*\n" +
+    "• 10% of your initial payment refunded back.\n" +
+    "• All profits generated from the volume boost.\n\n" +
+    "✨ *Why Choose Us?*\n" +
+    "1. Smart buy algorithms tailored to avoid detection.\n" +
+    "2. Support for multiple blockchains (Ethereum, Solana, Base).\n" +
+    "3. Transparent process with real-time updates.\n\n" +
+    "🚀 Ready to boost your token's volume? Start with /start and follow the steps!\n\n" +
+    "_For further questions, contact our support team._";
+
+  bot.sendMessage(chatId, volumeInfoMessage, {
+    parse_mode: "Markdown",
+    disable_web_page_preview: true,
   });
-  
+});
+
 // Callback query handler
 bot.on("callback_query", async (query) => {
   const chatId = query.message.chat.id;
@@ -278,11 +290,13 @@ bot.on("callback_query", async (query) => {
       `🌐 *Selected Blockchain:* ${blockchain.toUpperCase()}\n\nSelect your desired volume boost plan:`,
       generatePlanMenu(blockchain)
     );
-  } 
+  }
   // Plan selection
   else if (blockchainPlans[currentState.blockchain]?.[callbackData]) {
-    currentState.selectedPlan = blockchainPlans[currentState.blockchain][callbackData].amount;
-    currentState.planDescription = blockchainPlans[currentState.blockchain][callbackData].description;
+    currentState.selectedPlan =
+      blockchainPlans[currentState.blockchain][callbackData].amount;
+    currentState.planDescription =
+      blockchainPlans[currentState.blockchain][callbackData].description;
 
     bot.sendMessage(
       chatId,
@@ -313,17 +327,25 @@ bot.onText(/^[A-Za-z0-9]{32,44}$/, async (msg) => {
 
   // Validate inputs
   if (!blockchain) {
-    await bot.sendMessage(chatId, "⚠️ Please select a blockchain first.", { parse_mode: "Markdown" });
+    await bot.sendMessage(chatId, "⚠️ Please select a blockchain first.", {
+      parse_mode: "Markdown",
+    });
     return;
   }
 
   if (!selectedPlan) {
-    await bot.sendMessage(chatId, "⚠️ Please select a plan before providing the contract address.", { parse_mode: "Markdown" });
+    await bot.sendMessage(
+      chatId,
+      "⚠️ Please select a plan before providing the contract address.",
+      { parse_mode: "Markdown" }
+    );
     return;
   }
 
   if (!paymentMethod) {
-    await bot.sendMessage(chatId, "⚠️ Please select a payment method.", { parse_mode: "Markdown" });
+    await bot.sendMessage(chatId, "⚠️ Please select a payment method.", {
+      parse_mode: "Markdown",
+    });
     return;
   }
 
@@ -331,15 +353,15 @@ bot.onText(/^[A-Za-z0-9]{32,44}$/, async (msg) => {
 });
 
 // Error handling for unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
 // Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('Gracefully shutting down from SIGINT (Ctrl-C)');
+process.on("SIGINT", () => {
+  console.log("Gracefully shutting down from SIGINT (Ctrl-C)");
   bot.stopPolling();
   process.exit(0);
 });
 
-module.exports = bot;
+export { handleContractAddress, generatePlanMenu };
