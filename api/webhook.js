@@ -1,7 +1,6 @@
 // api/webhook.js
 import TelegramBot from "node-telegram-bot-api";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { JsonRpcProvider, Contract } from "ethers";
 import config from "../config.js";
 import logger from "../logger.js";
