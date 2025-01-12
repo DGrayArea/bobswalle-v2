@@ -7,6 +7,9 @@ import { JsonRpcProvider, Contract } from "ethers";
 import config from "../config.js";
 import logger from "../logger.js";
 
+//https://api.telegram.org/bot7479941090:AAG6S8U9cUplRpg6aAUYLM-7Mw4GVpwyXns/setWebhook?url=https://bobswallet.vercel.app/api/webhook
+// https://api.telegram.org/bot7479941090:AAG6S8U9cUplRpg6aAUYLM-7Mw4GVpwyXns/getWebhookInfo
+
 const bot = new TelegramBot(config.telegramBotToken, {
   webHook: {
     port: process.env.PORT || 443,
